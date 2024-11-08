@@ -2,6 +2,8 @@ import json
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
+
+from apps.projects.models import Project
 from apps.users.models import User
 
 from apps.users.choices.positions import UserPositions
@@ -42,30 +44,36 @@ class UserAPITests(APITestCase):
         self.assertEqual(User.objects.get().username, 'newuser')
 
     def test_get_user_detail(self):
+        project_1 = Project.objects.create(name='Project 1')
         user = User.objects.create(
             username='user1',
             first_name='John',
             last_name='Doe',
             email='john@example.com',
-            position=UserPositions.PROGRAMMER.value
+            position=UserPositions.PROGRAMMER.value,
+            project=project_1
         )
         url = reverse('user-detail', args=[user.id])
         response = self.client.get(url)
-        # print(response.data)
+        print(response.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['username'], 'user1')
         self.assertEqual(response.data['first_name'], 'John')
         self.assertEqual(response.data['last_name'], 'Doe')
         self.assertEqual(response.data['email'], 'john@example.com')
         self.assertEqual(response.data['position'], UserPositions.PROGRAMMER.value)
+        self.assertEqual(response.data['project'], 1)
 
     def test_user_detail_fields(self):
+        project_1 = Project.objects.create(name='Project 1')
         user = User.objects.create(
             username='user1',
             first_name='John',
             last_name='Doe',
             email='john@example.com',
-            position=UserPositions.PROGRAMMER.value
+            position=UserPositions.PROGRAMMER.value,
+            project=project_1
+
         )
         url = reverse('user-detail', args=[user.id])
         response = self.client.get(url)
@@ -75,11 +83,13 @@ class UserAPITests(APITestCase):
         self.assertIn('last_name', response.data)
         self.assertIn('email', response.data)
         self.assertIn('position', response.data)
+        self.assertIn('project', response.data)
         self.assertIsInstance(response.data['username'], str)
         self.assertIsInstance(response.data['first_name'], str)
         self.assertIsInstance(response.data['last_name'], str)
         self.assertIsInstance(response.data['email'], str)
         self.assertIsInstance(response.data['position'], str)
+        self.assertIsInstance(response.data['project'], int)
 
     def test_get_user_detail_non_existent(self):
         url = reverse('user-detail', args=[999])

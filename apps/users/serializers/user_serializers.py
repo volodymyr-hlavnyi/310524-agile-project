@@ -1,10 +1,17 @@
 import re
 
 from django.contrib.auth.password_validation import validate_password
-from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
+from rest_framework import serializers
 from apps.users.models import User
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    project = serializers.CharField(source='project.name')
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'position', 'project']
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -18,6 +25,7 @@ class UserListSerializer(serializers.ModelSerializer):
             'email',
             'phone',
             'last_login',
+            'project',
         )
 
 
