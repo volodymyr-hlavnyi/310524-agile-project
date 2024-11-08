@@ -6,6 +6,16 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from apps.users.models import User
 from apps.users.serializers.user_serializers import *
 
+from rest_framework.generics import RetrieveAPIView
+from apps.users.models import User
+from apps.users.serializers.user_serializers import UserListSerializer
+
+
+class UserDetailGenericView(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserListSerializer
+    lookup_field = 'id'
+
 
 class UserListGenericView(ListAPIView):
     serializer_class = UserListSerializer
