@@ -1,15 +1,17 @@
 from datetime import datetime
 from django.core.serializers import serialize
+from rest_framework.generics import get_object_or_404
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.utils import timezone
 
-from ..serializers.project_serializer import AllProjectSerializer, CreateProjectSerializer
+from ..serializers.project_serializer import AllProjectSerializer, CreateProjectSerializer, ProjectDetailSerializer
 from ..models.project import Project
 
-class ProjectsApi(APIView):
 
+class ProjectsApi(APIView):
     @staticmethod
     def get(request, date_from=None, date_to=None):
         if not date_from or not date_to:
@@ -31,3 +33,48 @@ class ProjectsApi(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectDetailAPIView(APIView):
+    def get_object(self, pk: int):
+        return get_object_or_404(Project, pk=pk)
+
+    def get(self, request: Request, pk: int) -> Response:
+        project = self.get_object(pk=pk)
+        serializer = ProjectDetailSerializer(project)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
+
+    def put(self, request: Request, pk: int) -> Response:
+        project = self.get_object(pk=pk)
+        serializer = ProjectDetailSerializer(
+            instance=project,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(
+                serializer.validated_data,
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def delete(self, request: Request, pk: int) -> Response:
+        project = self.get_object(pk=pk)
+        project.delete()
+
+        return Response(
+            data={
+                "message": "Project was deleted successfully"
+            },
+            status=status.HTTP_200_OK,
+        )

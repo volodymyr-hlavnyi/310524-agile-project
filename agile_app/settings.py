@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+
+from django.conf.global_settings import AUTH_USER_MODEL
 from environ import Env
 
 # Build paths inside the projects like this: BASE_DIR / 'subdir'.
@@ -29,6 +31,7 @@ DEBUG = env.bool("DEBUG")
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
+AUTH_USER_MODEL = 'users.User'
 
 # Application definition
 
@@ -42,11 +45,10 @@ INSTALLED_APPS = [
     #local apps
     'apps.tasks.apps.TasksConfig',
     'apps.projects.apps.ProjectConfig',
+    'apps.users.apps.UsersConfig',
 
     #3-rd party
     'rest_framework',
-
-
 ]
 
 MIDDLEWARE = [
